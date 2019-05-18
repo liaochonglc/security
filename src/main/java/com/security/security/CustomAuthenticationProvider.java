@@ -15,7 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
+//专门用来验证的
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Resource
@@ -26,9 +26,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         // 获取用户输入的用户名和密码
         String inputName = authentication.getName();
         String inputPassword = authentication.getCredentials().toString();
-
         CustomWebAuthenticationDetails details = (CustomWebAuthenticationDetails) authentication.getDetails();
-
         String verifyCode = details.getVerifyCode();
         if(!validateVerify(verifyCode)) {
             throw new DisabledException("验证码输入错误");
@@ -36,10 +34,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         // userDetails为数据库中查询到的用户信息
         UserDetails userDetails = userDetailsService.loadUserByUsername(inputName);
-
         // 如果是自定义AuthenticationProvider，需要手动密码校验
-        if(!userDetails.getPassword().equals(inputPassword)) {
-            throw new BadCredentialsException("密码错误");
+        if(!userDetails.getPassword().equals(inputPassword)||!userDetails.getUsername().equals(inputName)) {
+            throw new BadCredentialsException("账号密码错误");
         }
 
         return new UsernamePasswordAuthenticationToken(inputName, inputPassword, userDetails.getAuthorities());

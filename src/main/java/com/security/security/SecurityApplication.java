@@ -13,6 +13,7 @@ public class SecurityApplication {
     }
     @Bean
     public ServletRegistrationBean indexServletRegistration() {
+        //注册servlet
         ServletRegistrationBean registration = new ServletRegistrationBean(new VerifyServlet());
         registration.addUrlMappings("/getVerifyCode");
         return registration;

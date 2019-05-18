@@ -3,6 +3,7 @@ package com.security.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -19,12 +20,16 @@ import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)  //  启用方法级别的权限认证
+@EnableGlobalMethodSecurity(prePostEnabled = true)  //  启用方法级别的权限认证，想用注解必须加这个
+//@PreAuthorize("hasRole(‘admin‘)")
+//@PreAuthorize("hasPessmion(‘admin‘)")
+//WebSecurityConfigurerAdapter适配器
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private MyUserDetailsService myUserDetailsService;
     @Autowired
     private AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
+    //WebAuthenticationDetails提供了remoteAddress与sessionId信息
     @Autowired
     private CustomAuthenticationProvider customAuthenticationProvider;
 
@@ -36,6 +41,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 /*.antMatchers("/", "/index.do").permitAll()*/
                 .anyRequest().authenticated()   // 其他地址的访问均需验证权限
                 .and()
+                //表单登录
+                //.basic 这是浮框的登录方式
                 .formLogin()
                 //这个一定要不加会出现302跨域问题
                 .successForwardUrl("/user/hi")
@@ -45,15 +52,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 自定义登陆用户名和密码参数，默认为username和password
 //                .usernameParameter("username")
 //                .passwordParameter("password")
+                //这是个关于验证码的
                 .authenticationDetailsSource(authenticationDetailsSource)
                 .and()
                 .logout()
-                .logoutSuccessUrl("/login.do");//其实它也自带
+                .logoutSuccessUrl("/logout.do");//其实它也自带
         //设置跨域
         http.csrf().disable();
     }
 
     //这是给密码编码
+    //构建AuthenticationManager委托给AuthenticationProvider进行验证
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(myUserDetailsService).passwordEncoder(passwordEncoder());
         auth.authenticationProvider(customAuthenticationProvider);

@@ -16,9 +16,10 @@ import java.util.List;
 public class MyUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        System.out.println("------------"+s);
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("admin"));
         authorities.add(new SimpleGrantedAuthority("user"));
-        return new User("liaochong", "123456", authorities);
+        return new User("liaochong", "123456",true,true,true,true,authorities);
     }
 }
